@@ -1,107 +1,143 @@
-const newArr = [];
-let tracker = 0;
+const seatingArrangement = [];
+const NUM_OF_ROWS = 4;
+const NUM_OF_COLUMNS = 4;
+let seatingPosition = 0;
 
-for (let j = 0; j < 4; j++) {
-  // populate the array with seat numbers
-  const subArr = [];
-  for (let k = 0; k < 4; k++) {
-    const subsubArr = [++tracker];
-    subArr.push(subsubArr);
+for (let i = 0; i < NUM_OF_ROWS; i++) {
+  // populating the array with seat numbers
+
+  // create a row
+  const row = [];
+  for (let j = 0; j < NUM_OF_COLUMNS; j++) {
+    // increment the seating position, so the next seat can be one higher than the prevous one
+    seatingPosition = seatingPosition + 1;
+
+    // create a seat
+    const seat = [seatingPosition, false];
+
+    // add the seat to the row
+    row.push(seat);
   }
-  newArr.push(subArr);
+
+  // add the row to the seating arrangement
+  seatingArrangement.push(row);
 }
 
-const showSeatingArrangment = () => {
-  // go through the array and log the seating arrangement
-  console.log("\nThis is the current sitting arrangement:");
-  newArr.forEach((i) => {
-    let str = "";
-    i.forEach((j) => {
-      j.forEach((k) => {
-        str += k + "\t\t";
-      });
-    });
+const showSeatingArrangement = () => {
+  // go through the array and log the seating arrangement to the console
+  console.log("\nThis is the current seating arrangement");
 
-    console.log(str);
+  // Loop through the seating arrangement array to get each of the rows
+  seatingArrangement.forEach((row) => {
+    let rowStr = "";
+    row.forEach((seat) => {
+      // Loop through each row to get the seats
+      str = str + seat[0] + "\t\t";
+    });
+    // log each row
+    console.log(rowStr);
   });
 };
 
-const checkFull = () => {
-  // loops through arrays checks if the seats are full
-  let full = true;
-  newArr.forEach((i) => {
-    i.forEach((j) => {
-      j.forEach((k) => {
-        if (!isNaN(k)) return (full = false);
-      });
-      if (!full) return;
-    });
-    if (!full) return;
-  });
+const getInput = () => {
+  // Check if the Seating arrangement is full before getting any input
+  while (!classIsFull()) {
+    // Get the initial user input
+    const userInput = prompt("Enter a name or number");
 
-  if (!full) return false;
-  return true;
-};
+    // If there is no user input quit the code
+    if (!userInput) return;
 
-const getFirstInput = () => {
-  // starts and loops the app by getting the initial input
-  while (!checkFull()) {
-    const input = prompt(
-      "Please Enter Your name or a seat number to check who is seating there"
-    );
-
-    if (!input) {
-      showSeatingArrangment();
-      return;
-    } else if (isNaN(input)) seatPerson(input);
-    else checkPersonInSeat(input);
-  }
-};
-
-const seatPerson = (name) => {
-  const seatNumber = prompt("Please Enter your seat Number");
-
-  if (!seatNumber) {
-    //   check if the user entered a seat number
-    alert("invalid seat number");
-    return;
-  } else if (isNaN(seatNumber) || seatNumber < 1 || seatNumber > 16) {
-    //   check is the seatn number is valid
-    alert("invalid seat number please choose another seat");
-    return seatPerson(name);
-  } else {
-    // seat the person
-    const row = Math.ceil(seatNumber / 4) - 1;
-    const col = seatNumber - 4 * row;
-
-    if (!isNaN(newArr[row][col - 1][0])) {
-      // the seat is empty
-      newArr[row][col - 1][0] = name;
-      showSeatingArrangment();
+    // Check if the user input is a number or not
+    if (isNaN(userInput)) {
+      // If the user input is not a number then it must be a name and we want to seat the person
+      seatPerson(userInput);
     } else {
-      // the seat is full
-      alert(
-        `The chosen seat is already occupied by ${
-          newArr[row][col - 1][0]
-        }, please choose another seat`
-      );
-      return seatPerson(name);
+      // If the user input is a number then we want to check who is sat at that seat
+
+      // To check who is there we need to first get the row and the column
+      // The following formulae help us discern the rows and column given a seat number
+
+      // To get the rows we use Math.ceil which rounds up values
+      const row = Math.ceil(userInput / NUM_OF_ROWS) - 1;
+      const col = userInput - 4 * NUM_OF_COLUMNS - 1;
+
+      // check if the chosen seat is full
+      if (isFull(seatingArrangement[row][col])) {
+        // If the seat is full say the name of the person sat there
+        // seatingArrangement[row][col][0] represents the user in the seat
+        const person = seatingArrangement[row][col][0];
+        alert(`This seat is taken by ${person}`);
+      } else {
+        // If the seat is empty then say the seat is empty
+        alert("This seat is empty");
+      }
     }
   }
 };
 
-const checkPersonInSeat = (seatNumber) => {
-  // checks and prints the user in a particular seat or says if the seat is empty
-  const row = Math.ceil(seatNumber / 4) - 1;
-  const col = seatNumber - 4 * row;
-  const person = newArr[row][col - 1][0];
+const seatPerson = (userInput) => {
+  // prompt the user to enter a seat number
+  const seatNumber = prompt("Please enter your seat number");
 
-  if (!isNaN(person)) alert(`Seat ${seatNumber} is empty`);
-  else
-    alert(
-      `The person siting in seat ${seatNumber} is ${newArr[row][col - 1][0]}`
-    );
+  // if the user doesn't enter a seat number quit the function
+  if (!seatNumber) return;
+
+  // if the seat number is greater than 16, less than 1 or not a number then report the error and quit the function
+  if (seatNumber > 16 || seatNumber < 1 || !isNaN(seatNumber)) {
+    alert("invalid seat number");
+    return;
+  }
+
+  // To check who is there we need to first get the row and the column
+  // The following formulae help us discern the rows and column given a seat number
+
+  // To get the rows we use Math.ceil which rounds up values
+  const row = Math.ceil(userInput / NUM_OF_ROWS) - 1;
+  const col = userInput - 4 * NUM_OF_COLUMNS - 1;
+
+  // If the seat is full say the name of the person sat there
+  if (isFull(seatingArrangement[row][col])) {
+    alert("This seat is taken");
+    return;
+  }
+
+  // seatingArrangement[row][col][0] represents the user in the seat
+  seatingArrangement[row][col][0] = userInput;
+
+  // seatingArrangement[row][col][1] represents the boolean value that tells us if that particular seat is full
+  // We make it true now because the eat is full
+  seatingArrangement[row][col][1] = true;
+
+  // log the seating arrangement
+  showSeatingArrangement();
 };
 
-showSeatingArrangment();
-getFirstInput();
+const isFull = (seat) => {
+  // simply check if a seat is full by returning the second value in the array which is a boolean value that tells us if an array is full or not
+  return seat[1];
+};
+
+const classIsFull = () => {
+  // Loop through the seating arrangement array to see if there is any empty seat
+  for (let i = 0; i < seatingArrangement.length; i++) {
+    // seatingArrangement[i] represents the arrays in the seatingArrangement array which are the rows
+    const row = seatingArrangement[i];
+    for (let j = 0; j < row.length; j++) {
+      // row[i] represents the arrays in the row, each of which represents a single seat
+      const seat = row[j];
+
+      // check if each seat is full
+      // if any seat is not full, quit the function and return false, meaning the class is not full
+      if (!isFull(seat)) return false;
+    }
+  }
+  // if after looping through the entire array, no empty seat is found, this means the seating arrangement is full, so return true
+  return true;
+};
+
+// log the seating arrangement
+showSeatingArrangement();
+
+// to start the program get the input
+getInput();
